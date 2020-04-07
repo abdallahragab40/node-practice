@@ -1,6 +1,8 @@
 const path = require("path");
 const express = require("express");
 const hbs = require("hbs");
+const geocode = require("./utils/geocode");
+const forecast = require("./utils/forecast");
 
 const app = express();
 
@@ -39,10 +41,33 @@ app.get("/help", (req, res) => {
 });
 
 app.get("/weather", (req, res) => {
-  res.send({
-    forecast: "It is raining",
-    location: "Egypt",
-  });
+  if (!req.query.address) {
+    return res.send({
+      error: "You must provide an address here!",
+    });
+  }
+  geocode(
+    req.query.address,
+    (error, { latitude, longitute, location } = {}) => {
+      if (error) {
+        return res.send({
+          error,
+        });
+      }
+      forecast(latitude, longitute, (error, forecastData) => {
+        if (error) {
+          return res.send({
+            error,
+          });
+        }
+        res.send({
+          location,
+          forecast: forecastData,
+          address: req.query.address,
+        });
+      });
+    }
+  );
 });
 
 app.get("/help/*", (req, res) => {
@@ -53,6 +78,6 @@ app.get("*", (req, res) => {
   res.render("404", { error: "404 page not found" });
 });
 
-app.listen(3000, () => {
-  console.log("App is running on port 3000");
+app.listen(4200, () => {
+  console.log("App is running on port 4200");
 });
