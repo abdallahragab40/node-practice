@@ -59,7 +59,10 @@ router.patch("/tasks/:id", auth, async (req, res) => {
 
   try {
     //const task = await findById(req.params.id);
-    const task = await findOne({ _id: req.params.id, owner: req.user._id });
+    const task = await Task.findOne({
+      _id: req.params.id,
+      owner: req.user._id,
+    });
 
     // const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
     //   new: true,
